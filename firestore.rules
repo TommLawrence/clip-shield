@@ -1,0 +1,27 @@
+rules_version = '2';
+
+// ClipShield does not persist content in this build: the workspace keeps the
+// raw input and the rehydration mapping in browser memory only, and no Firestore
+// write exists in the app code.
+//
+// This file is therefore deny-by-default. If explicitly saved, sanitized reports
+// are added later, use the commented block below: owner-scoped by UID, and only
+// ever written with sanitized text (never the original input, raw PII, a
+// rehydration vault, secrets or full prompts).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // match /users/{userId}/reports/{reportId} {
+    //   allow read, delete: if request.auth != null && request.auth.uid == userId;
+    //   allow create, update: if request.auth != null
+    //     && request.auth.uid == userId
+    //     && request.resource.data.keys().hasOnly([
+    //          'mode', 'inferenceSource', 'latencyMs', 'maskedCount',
+    //          'sanitizedText', 'report', 'createdAt'
+    //        ]);
+    // }
+  }
+}

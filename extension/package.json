@@ -1,0 +1,14 @@
+{
+  "name": "clipshield-companion",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ClipShield companion — Manifest V3 browser extension that protects selected webpage text with the shared local deterministic redaction engine.",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch"
+  },
+  "devDependencies": {
+    "vite": "^8.2.4"
+  }
+}

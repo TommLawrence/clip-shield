@@ -1,0 +1,263 @@
+const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
+
+<!DOCTYPE html>
+<html lang="en" data-app-url="https://clipshield.db.app/">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ClipShield — Sanitize first. Route consciously.</title>
+  <meta name="description" content="ClipShield masks sensitive workplace information in your browser, shows you exactly what would be sent to AI, lets you choose where inference runs, and reports where it actually ran." />
+  <meta name="color-scheme" content="dark" />
+  <meta property="og:title" content="ClipShield — privacy-first hybrid AI workspace" />
+  <meta property="og:description" content="Sanitize first. Route consciously. Make privacy observable." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- 1. Sticky header with scroll response -->
+  <header id="site-header" data-header>
+    <div class="header-inner">
+      <a class="brand" href="#top" aria-label="ClipShield home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text">
+          <span class="brand-name">ClipShield</span>
+          <span class="brand-sub">Hybrid privacy workspace</span>
+        </span>
+      </a>
+
+      <nav class="nav-desktop" aria-label="Section navigation">
+        <a href="#how">How it works</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#modes">Modes</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="btn btn-primary" href="https://clipshield.db.app/" data-signin target="_blank" rel="noopener">
+          Take me in
+        </a>
+        <button class="burger" data-burger aria-expanded="false" aria-controls="mobile-nav" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. Mobile nav -->
+    <nav id="mobile-nav" class="nav-mobile" data-mobile-nav aria-label="Mobile navigation">
+      <a href="#how">How it works</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#modes">Modes</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn btn-primary btn-block" href="https://clipshield.db.app/" data-signin target="_blank" rel="noopener">Take me in</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <span id="top" aria-hidden="true" tabindex="-1"></span>
+
+    <!-- Hero + product moment -->
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Privacy gateway for generative AI</p>
+          <h1>Sanitize first.<br />Route consciously.<br /><span class="accent">Make privacy observable.</span></h1>
+          <p class="lede">
+            ClipShield masks the sensitive values inside your workplace documents before any AI request,
+            shows you exactly what would be sent, lets you choose where inference runs, and then reports
+            where it <em>actually</em> ran.
+          </p>
+          <div class="hero-cta">
+            <a class="btn btn-primary btn-lg" href="https://clipshield.db.app/" data-signin target="_blank" rel="noopener">
+              Take me in
+            </a>
+            <a class="btn btn-ghost btn-lg" href="#how">See how it works</a>
+          </div>
+          <p class="hero-note">No sign-in required during judging. Built for Google #BuildHybridAI 2026.</p>
+        </div>
+
+        <!-- 6. Product moment: pure-CSS mockup with gently bobbing floating cards -->
+        <div class="mockup reveal" aria-hidden="true">
+          <div class="mockup-frame">
+            <div class="mockup-bar">
+              <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+              <span class="mockup-title">ClipShield — sanitized preview</span>
+            </div>
+            <div class="mockup-body">
+              <div class="mock-line"><span class="lbl">Incident report</span></div>
+              <div class="mock-line mono">Reporter: <span class="tok">[PERSON_1]</span>, +<span class="tok">[PHONE_1]</span></div>
+              <div class="mock-line mono">Site: <span class="tok">[IPV4_1]</span> · Vendor: <span class="tok">[CUSTOMER_ID_1]</span></div>
+              <div class="mock-line mono">API key <span class="tok">[SECRET_1]</span> was rotated. No <span class="tok">[IBAN_1]</span> shared.</div>
+              <div class="mock-divider"></div>
+              <div class="mock-route">
+                <div class="route-row">
+                  <span class="route-key">Requested</span>
+                  <span class="route-pill pill-local">PREFER_ON_DEVICE</span>
+                </div>
+                <div class="route-row">
+                  <span class="route-key">Actual source</span>
+                  <span class="route-pill pill-device">
+                    <span class="pulse"></span> ON_DEVICE
+                  </span>
+                </div>
+                <div class="route-row">
+                  <span class="route-key">Latency</span>
+                  <span class="route-val">412 ms</span>
+                </div>
+                <div class="route-row">
+                  <span class="route-key">Masked</span>
+                  <span class="route-val">7 values</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="float-card float-card-a">Local airlock ✓</div>
+          <div class="float-card float-card-b">Zero persistence</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">How it works</p>
+        <h2>Four steps. All observable.</h2>
+      </div>
+      <ol class="steps">
+        <li class="step card reveal">
+          <span class="step-num">01</span>
+          <h3>Inspect</h3>
+          <p>Deterministic detection runs in your browser — emails, phone numbers, IPs, credentials, custom terms. Nothing leaves the tab.</p>
+        </li>
+        <li class="step card reveal">
+          <span class="step-num">02</span>
+          <h3>Redact</h3>
+          <p>An editable preview replaces each value with a reversible placeholder like <code>[EMAIL_1]</code>. Toggle findings on or off.</p>
+        </li>
+        <li class="step card reveal">
+          <span class="step-num">03</span>
+          <h3>Route</h3>
+          <p>Choose local-first, local-only, or deep cloud inference. Cloud paths require your explicit consent before any request.</p>
+        </li>
+        <li class="step card reveal">
+          <span class="step-num">04</span>
+          <h3>Observe</h3>
+          <p>The SDK reports the real <code>inferenceSource</code>, latency and fallback — so you see where it actually ran, not where you asked.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Privacy -->
+    <section id="privacy" class="section section-alt">
+      <div class="section-head reveal">
+        <p class="eyebrow">Privacy by construction</p>
+        <h2>What stays private, and how</h2>
+      </div>
+      <div class="cards">
+        <article class="card reveal">
+          <h3>Local airlock</h3>
+          <p>All detection and replacement happens synchronously in the browser, before any request is built. The model never sees raw values.</p>
+        </article>
+        <article class="card reveal">
+          <h3>Sanitized-only inference</h3>
+          <p>The prompt builder receives the sanitized string only. A defensive check rejects any payload that still contains a masked original.</p>
+        </article>
+        <article class="card reveal">
+          <h3>Memory-only vault</h3>
+          <p>The placeholder-to-value mapping lives in memory and is never persisted — no database, no storage, no server-side content.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Modes -->
+    <section id="modes" class="section">
+      <div class="section-head reveal">
+        <p class="eyebrow">Inference modes</p>
+        <h2>You decide where the thinking happens</h2>
+      </div>
+      <div class="cards">
+        <article class="card mode-card reveal">
+          <span class="mode-tag tag-local">Local</span>
+          <h3>Local-first hybrid</h3>
+          <p>Tries Gemini Nano on your device first, falling back to the cloud only with consent. Fallback is always reported.</p>
+        </article>
+        <article class="card mode-card reveal">
+          <span class="mode-tag tag-device">On-device</span>
+          <h3>Local-only private</h3>
+          <p>Locks inference to the device. If no local model is available, it fails closed with a clear message — never escalates to the cloud.</p>
+        </article>
+        <article class="card mode-card reveal">
+          <span class="mode-tag tag-cloud">Cloud</span>
+          <h3>Deep cloud synthesis</h3>
+          <p>A structured JSON report after your explicit confirmation. The sanitized string is the only content sent.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- FAQ (native details) -->
+    <section id="faq" class="section section-alt">
+      <div class="section-head reveal">
+        <p class="eyebrow">FAQ</p>
+        <h2>Questions, answered</h2>
+      </div>
+      <div class="faq reveal">
+        <details>
+          <summary><span>Does ClipShield store my documents?</span><span class="faq-mark" aria-hidden="true"></span></summary>
+          <p>No. Everything stays in your browser tab. There is no database write, no local storage, and no server-side persistence of content in this build.</p>
+        </details>
+        <details>
+          <summary><span>Where does inference actually run?</span><span class="faq-mark" aria-hidden="true"></span></summary>
+          <p>You choose the mode, but ClipShield reports the real source returned by the SDK — <code>on_device</code> or <code>in_cloud</code> — so you see what happened, not just what you requested.</p>
+        </details>
+        <details>
+          <summary><span>Do I need special hardware for on-device inference?</span><span class="faq-mark" aria-hidden="true"></span></summary>
+          <p>On-device inference needs Chrome desktop 139+ with the Prompt API enabled, and enough disk and memory for Gemini Nano. Without it, ClipShield offers the cloud path instead.</p>
+        </details>
+        <details>
+          <summary><span>Is detection perfect?</span><span class="faq-mark" aria-hidden="true"></span></summary>
+          <p>No. Detection is best-effort pattern matching and always needs human review. ClipShield is not a certified security or zero-trust product.</p>
+        </details>
+        <details>
+          <summary><span>Can I use it without an account?</span><span class="faq-mark" aria-hidden="true"></span></summary>
+          <p>Yes — during the #BuildHybridAI 2026 judging window the workspace is open with no sign-in required. This temporary open access is removed after judging concludes.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- CTA band -->
+    <section class="cta-band">
+      <div class="cta-inner reveal">
+        <h2>See it run on your own document</h2>
+        <p>Paste a ticket, incident report or vendor document and watch the airlock work.</p>
+        <a class="btn btn-primary btn-lg" href="https://clipshield.db.app/" data-signin target="_blank" rel="noopener">
+          Open ClipShield
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- 8. Living footer -->
+  <footer id="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark sm" aria-hidden="true"></span>
+        <span><strong>ClipShield</strong> — #BuildHybridAI 2026</span>
+      </div>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="#how">How it works</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#modes">Modes</a>
+        <a href="#faq">FAQ</a>
+        <a href="#top" data-back-to-top>Back to top ↑</a>
+      </nav>
+      <p class="footer-note">Detection is best-effort and always requires human review. Not a certified security product.</p>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

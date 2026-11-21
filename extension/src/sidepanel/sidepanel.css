@@ -1,0 +1,243 @@
+:root {
+  --bg: #0b0f14;
+  --panel: #121821;
+  --panel-2: #0f141b;
+  --border: rgba(255, 255, 255, 0.08);
+  --fg: #e6edf3;
+  --muted: #8b98a5;
+  --primary: #2dd4a7;
+  --primary-ink: #052e25;
+  --amber: #fbbf24;
+  --rose: #fb7185;
+  --sky: #38bdf8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--fg);
+  background: var(--bg);
+}
+
+#app {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+header h1 {
+  font-size: 16px;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+header h1 span {
+  color: var(--muted);
+  font-weight: 500;
+}
+.tag {
+  margin: 4px 0 0;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  padding: 12px;
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.card-head h2 {
+  font-size: 12px;
+  margin: 0;
+}
+.count {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.switch-label {
+  display: flex;
+  flex-direction: column;
+}
+.switch-label .hint {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.toggle input {
+  display: none;
+}
+.toggle .track {
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: #2a3340;
+  position: relative;
+  transition: background 0.15s;
+}
+.toggle .track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+.toggle input:checked + .track {
+  background: var(--primary);
+}
+.toggle input:checked + .track::after {
+  transform: translateX(16px);
+}
+
+textarea {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg);
+  padding: 8px 10px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+
+.findings,
+.ot {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.finding {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.finding .cat {
+  color: var(--muted);
+  min-width: 120px;
+}
+.finding .val {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+.badge.ot {
+  font-size: 9px;
+  color: var(--amber);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 999px;
+  padding: 0 6px;
+}
+.ot .cat {
+  font-size: 9px;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+.sev-critical { color: var(--rose); border: 1px solid rgba(251, 113, 133, 0.3); }
+.sev-high { color: var(--amber); border: 1px solid rgba(251, 191, 36, 0.3); }
+.sev-medium { color: var(--sky); border: 1px solid rgba(56, 189, 248, 0.3); }
+.ot code {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.sanitized {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  max-height: 240px;
+  overflow: auto;
+  margin: 0 0 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg);
+  padding: 7px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btn.ghost {
+  background: rgba(255, 255, 255, 0.03);
+}
+.btn.primary {
+  background: var(--primary);
+  color: var(--primary-ink);
+  border-color: var(--primary);
+  font-weight: 600;
+}
+.btn.full {
+  width: 100%;
+  margin-top: 8px;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.note {
+  font-size: 10.5px;
+  color: var(--muted);
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 10.5px;
+  padding: 4px 0;
+}

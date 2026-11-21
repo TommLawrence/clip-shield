@@ -1,0 +1,20 @@
+{
+  "name": "@clipshield/privacy-core",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Framework-independent universal privacy engine (deterministic + contextual detection, validation, policy and local-semantic merge) shared by the ClipShield web workspace and Chrome companion extension.",
+  "exports": {
+    "./redaction": "./redaction.js",
+    "./categories": "./categories.js",
+    "./detectors": "./detectors.js",
+    "./policy": "./policy.js",
+    "./semantic": "./semantic.js",
+    "./risk-engine": "./risk-engine.js",
+    "./placeholders": "./placeholders.js",
+    "./ot-guardrail": "./ot-guardrail.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}
