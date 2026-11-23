@@ -31,11 +31,16 @@ extension — the hosted web workspace remains the cloud inference destination.
 
 ## Permissions
 
-Only `sidePanel` and `contextMenus`. Selection text is provided by Chrome's
-context-menu API (`info.selectionText`), so the extension needs no access to
-page contents.
+The extension declares `sidePanel`, `contextMenus`, `clipboardRead`, and
+`clipboardWrite`. Clipboard access is used only after the user clicks **Paste**
+or **Copy sanitized text**. Selection text is provided by Chrome's context-menu
+API (`info.selectionText`), so the extension needs no access to page contents.
 
 ## Build
+
+Use desktop Chrome 114 or newer for the side-panel extension. The optional
+Prompt API semantic scan requires supported desktop Chrome 139+ hardware; the
+deterministic redaction and review flow does not require Gemini Nano.
 
 ```bash
 cd extension

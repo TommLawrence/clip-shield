@@ -112,7 +112,7 @@ function render() {
     '<section class="card"><div class="card-head"><h2>Sanitized preview</h2>',
     `<span class="count">${redaction.maskedCount} masked</span></div>`,
     `<pre class="sanitized">${escapeHtml(redaction.sanitized || "—")}</pre>`,
-    '<div class="actions"><button id="copy" class="btn primary" ${!redaction.sanitized ? "disabled" : ""}>Copy sanitized text</button>',
+    `<div class="actions"><button id="copy" class="btn primary" ${!redaction.sanitized ? "disabled" : ""}>Copy sanitized text</button>`,
     '<button id="workspace" class="btn ghost">Open ClipShield web workspace</button></div></section>',
 
     state.otFindings.length
