@@ -1,5 +1,4 @@
 import { readFileSync } from "node:fs";
-
 import base44 from "@base44/vite-plugin";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";

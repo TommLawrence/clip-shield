@@ -1,0 +1,26 @@
+{
+  "name": "ClipShield — privacy-first hybrid AI workspace",
+  "short_name": "ClipShield",
+  "description": "Sanitize sensitive workplace documents locally, then run Firebase AI Logic hybrid inference with visible on-device or cloud routing.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0f14",
+  "theme_color": "#0b0f14",
+  "categories": ["productivity", "security", "developer"],
+  "icons": [
+    {
+      "src": "/icons/shield.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/shield-maskable.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -160,37 +160,97 @@ export function detectFindings(text, { customTerms = [], profile, policy = "bala
   });
 }
 
-/** Add a manually selected span as a finding (offsets are relative to the raw text). */
-export function addManualFinding(text, findings, start, end) {
+function nextTokenForPrefix(findings, prefix) {
+  const re = new RegExp(`^\\[${escapeRegExp(prefix)}_(\\d+)\\]$`);
+  let max = 0;
+  for (const finding of findings) {
+    const match = re.exec(finding.token);
+    if (match) max = Math.max(max, Number(match[1]));
+  }
+  return `[${prefix}_${max + 1}]`;
+}
+
+function tokenForValue(findings, value) {
+  const hit = findings.find((finding) => finding.value === value && finding.token);
+  return hit ? hit.token : null;
+}
+
+/**
+ * Add a manually selected span as a finding. Offsets are relative to the raw
+ * text. Options:
+ *   category       — taxonomy category id (default MANUAL). Controls the
+ *                    placeholder prefix. If the same value is already masked,
+ *                    its existing token is reused so placeholders stay
+ *                    consistent across the document.
+ *   allOccurrences — also mask every exact, non-overlapping occurrence of the
+ *                    selected value, all sharing one placeholder.
+ */
+export function addManualFinding(text, findings, start, end, { category = "MANUAL", allOccurrences = false } = {}) {
   const from = Math.min(start, end);
   const to = Math.max(start, end);
   if (!text || to - from < 2) return findings;
-  if (findings.some((finding) => finding.start < to && from < finding.end)) return findings;
 
   const value = text.slice(from, to);
-  const manualCount = findings.filter((finding) => finding.category === "MANUAL").length;
+  const meta = CATEGORIES[category] || CATEGORIES.MANUAL;
 
-  return [
-    ...findings,
-    {
-      id: `MANUAL-${from}-${to}`,
-      category: "MANUAL",
-      label: CATEGORIES.MANUAL.label,
-      severity: CATEGORIES.MANUAL.severity,
-      prefix: CATEGORIES.MANUAL.prefix,
-      weight: CATEGORIES.MANUAL.weight,
-      group: CATEGORIES.MANUAL.group,
-      start: from,
-      end: to,
-      value,
-      token: `[MANUAL_${manualCount + 1}]`,
-      include: true,
-      source: "manual",
-      method: "user",
-      confidence: "high",
-      profileOnly: false,
-    },
-  ].sort((a, b) => a.start - b.start);
+  // Reuse an existing placeholder for the same value so the same secret always
+  // maps to one token (consistent placeholders, no duplicate vault entries).
+  const token = tokenForValue(findings, value) || nextTokenForPrefix(findings, meta.prefix);
+
+  const buildFinding = (s, e) => ({
+    id: `${meta.id}-${s}-${e}`,
+    category: meta.id,
+    label: meta.label,
+    severity: meta.severity,
+    prefix: meta.prefix,
+    weight: meta.weight,
+    group: meta.group,
+    start: s,
+    end: e,
+    value: text.slice(s, e),
+    token,
+    include: true,
+    source: "manual",
+    method: "user",
+    confidence: "high",
+    profileOnly: false,
+  });
+
+  const add = (list, s, e) => {
+    if (list.some((finding) => finding.start < e && s < finding.end)) return list;
+    return [...list, buildFinding(s, e)];
+  };
+
+  let next = add(findings, from, to);
+  if (!allOccurrences) return next.sort((a, b) => a.start - b.start);
+
+  // Mask every exact, non-overlapping occurrence — all sharing one token.
+  const re = new RegExp(escapeRegExp(value), "g");
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    if (match[0].length === 0) {
+      re.lastIndex += 1;
+      continue;
+    }
+    next = add(next, match.index, match.index + match[0].length);
+  }
+  return next.sort((a, b) => a.start - b.start);
+}
+
+/**
+ * Map a sanitized-string character offset back to a raw-text offset using the
+ * sanitizeMap produced by buildRedaction. Returns null when the offset falls
+ * inside a placeholder token — selecting across a placeholder must not be
+ * maskable, because it would corrupt the rehydration mapping.
+ */
+export function sanitizeOffsetToRaw(sanitizeMap, offset) {
+  for (const seg of sanitizeMap) {
+    if (offset >= seg.sStart && offset <= seg.sEnd) {
+      const local = Math.min(Math.max(offset - seg.sStart, 0), seg.sEnd - seg.sStart);
+      return Math.min(seg.rStart + local, seg.rEnd);
+    }
+  }
+  return null;
 }
 
 /**
@@ -204,10 +264,19 @@ export function buildRedaction(text, findings) {
   let cursor = 0;
   const mapping = [];
   const seen = new Set();
+  // Plain-text (non-token) segments of the sanitized output, mapped back to
+  // raw offsets. Token regions are intentionally absent: a selection that
+  // crosses a placeholder is not maskable, so the mapping cannot be corrupted.
+  const sanitizeMap = [];
 
   for (const finding of included) {
     if (finding.start < cursor) continue;
-    sanitized += text.slice(cursor, finding.start);
+    const slice = text.slice(cursor, finding.start);
+    if (slice) {
+      const sStart = sanitized.length;
+      sanitized += slice;
+      sanitizeMap.push({ sStart, sEnd: sanitized.length, rStart: cursor, rEnd: finding.start });
+    }
     sanitized += finding.token;
     cursor = finding.end;
     if (!seen.has(finding.token)) {
@@ -215,11 +284,17 @@ export function buildRedaction(text, findings) {
       mapping.push({ token: finding.token, category: finding.category, label: finding.label, value: finding.value });
     }
   }
-  sanitized += text.slice(cursor);
+  const tail = text.slice(cursor);
+  if (tail) {
+    const sStart = sanitized.length;
+    sanitized += tail;
+    sanitizeMap.push({ sStart, sEnd: sanitized.length, rStart: cursor, rEnd: text.length });
+  }
 
   return {
     sanitized,
     mapping,
+    sanitizeMap,
     maskedCount: included.length,
     uniqueTokens: mapping.length,
     categories: [...new Set(included.map((finding) => finding.category))],

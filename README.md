@@ -1,175 +1,134 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 # ClipShield
 
-**A privacy-first hybrid AI workspace for sensitive workplace information.**
-Built for Google **#BuildHybridAI 2026** by an independent solo developer.
+**A privacy-first workspace for analysing sensitive workplace text with hybrid AI.**
 
-ClipShield sits between the person and the model. It masks sensitive values in the browser, shows exactly what would be sent, lets you choose where inference runs, and then reports where it *actually* ran.
+ClipShield helps people use generative AI with support tickets, incident reports, maintenance notes, and vendor documents. It detects sensitive values in the browser, lets the user review and redact them, then makes the inference route and result visible.
 
 > Sanitize first. Route consciously. Make privacy observable.
 
-Detection is best-effort pattern matching and always needs human review. ClipShield is not a certified security or zero-trust product.
+ClipShield is a hackathon project, not a certified security product. Detection is best-effort pattern matching; users must review redactions and generated recommendations.
 
-> ## ⚠️ For judges and visitors — temporary open access (read this first)
->
-> **You do not need to create an account or sign in to use ClipShield right now.**
-> For the duration of the **#BuildHybridAI 2026** judging window the workspace at
-> `https://clipshield.db.app/` is open — judges and visitors are taken straight
-> into the working tool from the landing page's "Take me in" button.
->
-> This **auto-access is temporary.** It will be removed on the **final day of
-> judging** or as soon as the judges have made their final decision — whichever
-> comes first. After that, a normal sign-in will be required, exactly as the
-> landing page and workspace describe.
->
-> Nothing about this changes the privacy model: your pasted text and the
-> redaction vault still never leave your browser tab.
->
-> **The standalone landing page lives in [`./landing/`](./landing).** It is a
-> self-contained static site (no build, no dependencies) that can be exported and
-> deployed as its own project separate from the workspace app.
+## Live demo and source
 
----
+- **Live workspace:** [clipshield.base44.app](https://clipshield.base44.app/)
+- **Public source repository:** [github.com/TommLawrence/clip-shield](https://github.com/TommLawrence/clip-shield)
+- **Hackathon:** [#BuildHybridAI 2026](https://firebasehybridaihackathon.devpost.com/)
+- **On-device testing:** [Judge and developer test guide](./docs/ON_DEVICE_TESTING.md)
 
-## 1. What it does
+The live workspace is open to visitors during the judging period. Access is temporary and may be removed after judging.
 
-| Step | What happens | Where |
-| --- | --- | --- |
-| 01 Input | Paste a ticket, incident report, maintenance log or vendor document, or load one of four synthetic scenarios | Browser |
-| 02 Inspect | Deterministic detection of emails, international phone numbers, IPv4 addresses, API keys, bearer tokens, JWTs, GitHub/cloud credentials, private-key blocks, custom terms and manual selections. Explainable exposure score | Browser only |
-| 03 Redact | Editable preview with reversible placeholders (`[EMAIL_1]`, `[PHONE_1]`, `[SECRET_1]`), per-finding toggles, custom masks and a memory-only rehydration vault | Browser only |
-| 04 Route | Local-first (`PREFER_ON_DEVICE`), local-only (`ONLY_ON_DEVICE`), or deep cloud (`ONLY_IN_CLOUD`) | Firebase AI Logic |
-| 05 Observe | Requested mode, actual `inferenceSource`, latency, fallback status, masked count, model, structured-output status | Firebase AI Logic response |
-| 06 Read | Short brief, or a structured report with executive summary, security findings, risk matrix, actions, operational considerations and items requiring human verification | Browser |
+## How it works
 
-Session controls clear the input, the mapping, or the entire workspace at any time. Nothing is persisted.
+1. **Add text.** Paste a workplace record or choose one of the synthetic demonstration scenarios.
+2. **Inspect locally.** Deterministic detectors identify common personal, credential, and infrastructure values. An explainable exposure score helps prioritize review.
+3. **Review redactions.** Edit findings, add custom terms, or select text the detectors missed. Inspect the sanitized preview before inference.
+4. **Choose a route.** Run locally when Gemini Nano is available, require local-only execution, or explicitly send sanitized text to the cloud.
+5. **Check the result.** The routing inspector reports the requested mode, actual source returned by Firebase AI Logic, model, latency, fallback, and masked count.
 
----
+| Mode | Behavior |
+| --- | --- |
+| Local-first (**PREFER_ON_DEVICE**) | Tries on-device Gemini Nano; cloud fallback is possible only with consent. |
+| Local-only (**ONLY_ON_DEVICE**) | Stays on the device and fails closed if the model is unavailable. |
+| Deep cloud (**ONLY_IN_CLOUD**) | Sends sanitized text after confirmation and requests a structured report. |
+| Cloud-preferred (**PREFER_IN_CLOUD**) | Prefers cloud inference and can use the device if cloud inference is unavailable. |
 
-## 2. Architecture
+## Privacy model and limitations
 
-```
-src/lib/redaction.js       deterministic detection + placeholder mapping (browser only)
-src/lib/risk-engine.js     explainable exposure scoring from findings (no model involved)
-src/lib/firebase.js        Firebase app, App Check and AI Logic initialization
-src/lib/hybrid-ai.js       inference execution, model configuration, error normalization
-src/lib/hybrid-modes.js    mode metadata, prompts, JSON schema, capability probe
-src/lib/telemetry.js       allow-listed, in-memory, content-free session metrics
-src/lib/scenarios.js       four synthetic demonstration scenarios
-src/lib/server-fns.js      server function returning the public Firebase web config
-src/lib/firebase-config.server.js  reads the config from app secrets (server only)
-src/hooks/useClipShield.js workspace state machine
-src/components/clipshield/ reusable workspace UI
-src/routes/index.jsx       the workspace
-src/routes/how-it-works.jsx privacy model, requirements and verification status
-tests/redaction.test.mjs   17 tests covering detection, redaction and security boundaries
-```
+- Detection, redaction, and the placeholder-to-value vault run in the browser.
+- Raw input, detected original values, and the rehydration mapping are not sent to Firebase AI Logic.
+- Cloud inference receives only the sanitized text, after the relevant confirmation.
+- The vault and workspace content remain in the current tab. Reset controls clear the input and mappings.
+- In the hosted app, only the theme preference is saved in browser storage. The service worker caches static app resources, not workspace content or inference requests.
+- Routing telemetry is an in-memory allow-list of mode, source, latency, counts, and outcome fields. It excludes prompt text, raw values, and tokens.
 
-The AI layer only ever receives the **sanitized** string. `useClipShield` builds it with `buildRedaction(raw, findings)` and runs a defensive `containsRawValues()` check before calling `runInference`. The raw input, the finding values and the rehydration mapping are never arguments to any Firebase call.
+Pattern matching can miss sensitive data or flag harmless text. Model output can be incorrect or incomplete. A person must verify both the redactions and recommendations. ClipShield does not provide operational approval or replace site procedures.
 
-### Runtime note (important for judges)
+## Architecture
 
-The brief specified Next.js App Router. This submission runs on the Base44 platform, whose supported runtime is **TanStack Start** (React 19, Vite, Cloudflare Workers) with file-based routes and server functions. The module boundaries requested in the brief are preserved exactly (`redaction`, `risk-engine`, `hybrid-ai`, `firebase`, `telemetry`, reusable components, route pages); only the framework adapter differs. TypeScript was likewise delivered as plain ES modules, because this workspace's runtime and toolchain are JavaScript-only. Firebase AI Logic, App Check and the hybrid inference API usage are unchanged.
+ClipShield is a JavaScript application built with React 19, TanStack Start, and Vite. The hosted app runs on Base44's Cloudflare Workers runtime.
 
----
+| Area | Implementation |
+| --- | --- |
+| Redaction and exposure scoring | Browser-side deterministic logic in src/lib/redaction.js and src/lib/risk-engine.js |
+| Firebase setup | Firebase AI Logic and App Check in src/lib/firebase.js |
+| Inference routing | Modes, prompts, model calls, structured output, and error handling in src/lib/hybrid-modes.js and src/lib/hybrid-ai.js |
+| Workspace state | src/hooks/useClipShield.js |
+| Reusable interface | src/components/clipshield/ |
+| Routes | TanStack file routes in src/routes/ |
+| Shared detector package | packages/privacy-core/ |
+| Tests | Node test suites in tests/ |
 
-## 3. Privacy safeguards
+Firebase AI Logic performs inference. App Check uses ReCaptchaEnterpriseProvider with a reCAPTCHA Enterprise web key registered for the Firebase web app. The app does not use a Firebase service-account credential.
 
-- **Local airlock.** All detection and replacement happens synchronously in the browser before any request.
-- **Sanitized-only inference.** The prompt builder receives the sanitized string; a safety check rejects a payload that still contains a masked original value.
-- **Memory-only vault.** The placeholder-to-value mapping lives in React state. Clearing mappings or resetting the workspace drops it.
-- **No persistence.** There are no Firestore writes, no `localStorage`, no `sessionStorage`, and no server-side storage of content in this build. `firestore.rules` ships deny-all in case sanitized-report persistence is added later.
-- **Content-free telemetry.** `src/lib/telemetry.js` accepts an allow-list of numeric/enum fields only; prompt text, raw values and tokens are dropped. Nothing is transmitted.
-- **Explicit restoration only.** Original values are never re-inserted into generated reports. “Copy with originals” is a deliberate click and happens in the browser.
-- **Consent gates.** Local-first requires consent for possible cloud fallback; deep cloud requires explicit confirmation. Local-only has no cloud code path.
+## On-device requirements
 
----
+Web on-device inference uses Firebase AI Logic's hybrid web support and Chrome's built-in Prompt API. It needs Chrome desktop version 139 or newer and a device that meets Chrome's current built-in model requirements. The model may need to download before first use.
 
-## 4. Inference modes
+See the [Firebase hybrid web guide](https://firebase.google.com/docs/ai-logic/hybrid/web/get-started), [Chrome built-in AI requirements](https://developer.chrome.com/docs/ai/get-started), and the [step-by-step test guide](./docs/ON_DEVICE_TESTING.md).
 
-| Mode | Firebase AI Logic | Cloud model | Behaviour |
-| --- | --- | --- | --- |
-| Local-first hybrid brief | `InferenceMode.PREFER_ON_DEVICE` | `gemini-4-hydrogen` via `inCloudParams` | Tries Gemini Nano 4 on the device; may fall back to cloud. Consent required, fallback reported. |
-| Local-only private brief | `InferenceMode.ONLY_ON_DEVICE` | none | Fails closed with a clear message when the device model is unavailable. Never escalates. |
-| Deep cloud synthesis | `InferenceMode.ONLY_IN_CLOUD` | `gemini-4-hydrogen` | Structured JSON report after explicit confirmation. |
+A cloud success does not verify the on-device path. Confirm an actual ON_DEVICE response in the routing inspector before claiming a local inference pass.
 
-Model instances are created with `getGenerativeModel(ai, { mode, inCloudParams, onDeviceParams })` from `getAI(app, { backend: new GoogleAIBackend() })`. On-device preparation calls `model.initializeDeviceModel(onProgress)` **only** from a user action (“Prepare local AI” or a run button) — never on page mount. Download progress is displayed.
+## Configuration
 
-`inferenceSource` is read from `result.response.inferenceSource` and normalized for display (`on_device` → `ON_DEVICE`, `in_cloud` → `IN_CLOUD`). If the SDK does not return a source, the inspector says so; no value is fabricated.
+For the hosted app, set these values in **Base44 Dashboard → Secrets**. The server reads them with base44:runtime; a plain Vite process does not automatically read the dashboard secret store.
 
----
+Required Firebase web configuration:
 
-## 5. Setup
-
-1. **Firebase project** with **AI Logic** enabled (Gemini Developer API) and a registered **web app**.
-2. **App Check** registered for the web app with **reCAPTCHA Enterprise** (or reCAPTCHA v3).
-3. Add these values as app secrets (App settings → Secrets):
-
-```
+~~~text
 FIREBASE_API_KEY
 FIREBASE_AUTH_DOMAIN
 FIREBASE_PROJECT_ID
 FIREBASE_APP_ID
-FIREBASE_STORAGE_BUCKET          # optional
-FIREBASE_MESSAGING_SENDER_ID     # optional
-FIREBASE_APP_CHECK_SITE_KEY      # reCAPTCHA site key used by App Check
-FIREBASE_APP_CHECK_PROVIDER      # optional: "enterprise" (default) or "v3"
-```
+FIREBASE_APP_CHECK_SITE_KEY
+~~~
 
-Alternatively set a single `FIREBASE_WEB_CONFIG` secret containing the JSON object from the Firebase console.
+Optional values:
 
-The configuration is read per request by a server function and only project identifiers reach the browser. No service account, private key or admin credential is used or required.
+~~~text
+FIREBASE_STORAGE_BUCKET
+FIREBASE_MESSAGING_SENDER_ID
+FIREBASE_WEB_CONFIG
+FIREBASE_APPCHECK_DEBUG_TOKEN
+~~~
 
-`.env.example` documents the same names for local experimentation. Never commit real values.
+FIREBASE_WEB_CONFIG can provide the Firebase web config and App Check fields as one JSON value instead of individual values. Firebase web configuration and the reCAPTCHA site key are public identifiers delivered to the browser; never put a service-account key or other server credential in the client bundle.
 
-### Chrome requirements for on-device inference
+Keep FIREBASE_APPCHECK_DEBUG_TOKEN unset in production. .env.example documents variable names only. Do not commit .env.local or production values.
 
-- **Chrome desktop 139 or newer** (other browsers and mobile Chrome cannot run on-device inference).
-- The Chrome **Prompt API** must be available; Gemini Nano may need to be downloaded (first run can take several gigabytes).
-- Sufficient disk space and memory for the model.
-- Firebase AI Logic hybrid web support requires SDK **v12.5.0+** (this project installs `firebase@^12.19.0`, which includes `initializeDeviceModel`, `InferenceMode` and `inferenceSource`).
+## Local development
 
-When on-device inference is unavailable, the app shows the readiness reason and offers deep cloud synthesis instead. “Force on-device only” locks the workspace to `ONLY_ON_DEVICE` and disables cloud modes — it is not an offline-mode claim.
+1. Install Node.js and npm, then install locked dependencies:
 
----
+   ~~~bash
+   npm ci
+   ~~~
 
-## 6. Verification
+2. Authenticate and link this checkout with the [Base44 CLI](https://docs.db.com/developers/references/cli/get-started/overview.md). Set the Firebase values in the linked app's **Dashboard → Secrets**.
+3. Start the app with the Base44 runtime:
 
-```bash
-npm test        # 17 deterministic tests: detection, redaction, scoring, telemetry, prompts
-npm run build   # production build
-```
+   ~~~bash
+   npx base44 dev
+   ~~~
 
-### Verified
+4. For local App Check, temporarily allow the hostname localhost in the reCAPTCHA Enterprise key's allowed domains. Do not use a debug token. See the [on-device testing guide](./docs/ON_DEVICE_TESTING.md).
 
-- Email, `+256`-style international and local phone numbers, IPv4, API keys, AWS keys, GitHub tokens, bearer tokens, JWTs and private-key blocks are detected and replaced.
-- Overlapping matches are resolved without corrupting the output.
-- Custom terms and manual selections become masks; excluding a finding keeps that value and lowers the score.
-- The same value reuses one placeholder; rehydration round-trips exactly.
-- Sanitized output contains no masked original value, and `containsRawValues` catches a deliberate leak.
-- Prompts built from sanitized text contain no finding values.
-- Exposure scoring is deterministic, explainable and bounded to 0–100.
-- Telemetry drops prompt content and raw values.
+Useful checks:
 
-### Not verified in this deployment
+~~~bash
+npm run lint
+npm test
+npx base44 build
+~~~
 
-- **No Firebase project configuration is attached to this workspace**, so no live `PREFER_ON_DEVICE`, `ONLY_ON_DEVICE` or `ONLY_IN_CLOUD` request has been executed here. The app reports the missing configuration instead of simulating a result.
-- Genuine on-device inference must be tested on supported Chrome desktop hardware with Gemini Nano available. A passing cloud run is not evidence of on-device execution.
-- App Check behaviour against your project's reCAPTCHA registration is untested until the secrets above are set.
+## Verification status
 
----
+- **Hosted cloud path:** verified on the published Base44 site. App Check reported the Enterprise provider active, the site key loaded, and debug mode inactive; a cloud inference returned IN_CLOUD.
+- **On-device path:** not yet verified on a qualifying device. Follow the test guide and confirm the response inspector reports ON_DEVICE.
 
-## 7. Hackathon scope and pre-existing material
+## Hackathon disclosure
 
-**Created during the submission period (November 2026):** the privacy airlock, exposure engine, scenario data, hybrid inference layer, workspace UI, setup/verification pages, tests and documentation.
+The privacy workflow, exposure scoring, demonstration scenarios, hybrid inference, workspace, tests, and project documentation were developed for this submission. The project also uses the Base44 TanStack Start starter and open-source dependencies listed in package.json.
 
-**Pre-existing starter material:** the Base44 TanStack Start application starter (routing, build configuration, UI primitives, auth components) and the open-source dependencies listed in `package.json`. No ClipShield feature existed before this build. No production credentials, personal data or App Check debug tokens are included.
+## License
 
-Not implemented by design: a companion Chrome extension, multi-agent workflows, RAG, analytics infrastructure, persistence and access-control systems.
-
----
-
-## 8. License
-
-Apache-2.0. See [LICENSE](./LICENSE).
+ClipShield is licensed under the [Apache License 2.0](./LICENSE).

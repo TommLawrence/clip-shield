@@ -1,8 +1,6 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useMemo } from "react";
-
+import { base44 } from "@/api/base44Client";
 import { currentUrl } from "@/lib/authReturnTo";
 
 /**
@@ -17,9 +15,9 @@ export const authQuery = queryOptions({
   queryKey: ["auth", "me"],
   queryFn: async () => {
     // No token means no session; /me could only answer 401.
-    if (!db.auth.hasToken()) return { user: null, error: null };
+    if (!base44.auth.hasToken()) return { user: null, error: null };
     try {
-      return { user: await db.auth.me(), error: null };
+      return { user: await base44.auth.me(), error: null };
     } catch (err) {
       if (err?.data?.extra_data?.reason === "user_not_registered") {
         return { user: null, error: { type: "user_not_registered", message: "Not registered" } };
@@ -52,12 +50,12 @@ export function AuthProvider({ children }) {
       refresh: () => queryClient.fetchQuery({ ...authQuery, staleTime: 0 }),
       logout: () => {
         queryClient.setQueryData(authQuery.queryKey, { user: null, error: null });
-        db.auth.logout(window.location.origin);
+        base44.auth.logout(window.location.origin);
       },
       // Full-page sign-in: /login with the current page as the way back. A hard
       // navigation on purpose — on an app served behind the platform login the
       // platform answers /login itself; an app with its own auth pages serves its /login route.
-      navigateToLogin: () => db.auth.redirectToLogin(currentUrl()),
+      navigateToLogin: () => base44.auth.redirectToLogin(currentUrl()),
     }),
     [data, error, isPending, queryClient],
   );

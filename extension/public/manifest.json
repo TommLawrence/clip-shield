@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "ClipShield Companion",
+  "version": "0.1.0",
+  "description": "Protect selected webpage text with ClipShield's local deterministic redaction before sharing it with AI.",
+  "permissions": ["sidePanel", "contextMenus"],
+  "action": {
+    "default_title": "ClipShield — open the protection side panel"
+  },
+  "side_panel": {
+    "default_path": "src/sidepanel/index.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  }
+}

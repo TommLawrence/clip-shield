@@ -10,15 +10,7 @@ export default [
   {
     files: ["**/*.{js,jsx,mjs}"],
     languageOptions: {
-      // base44 / getAccessToken / createClientFromRequest are injected by the
-      // Base44 platform tooling (Vite plugin + runtime) — not missing imports.
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-        base44: "readonly",
-        getAccessToken: "readonly",
-        createClientFromRequest: "readonly",
-      },
+      globals: { ...globals.browser, ...globals.node },
       parserOptions: { ecmaVersion: "latest", sourceType: "module", ecmaFeatures: { jsx: true } },
     },
     plugins: { "react-hooks": pluginReactHooks },

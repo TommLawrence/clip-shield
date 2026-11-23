@@ -1,3 +1,4 @@
+import { getAccessToken } from "@base44/sdk";
 
 const isBrowser = typeof window !== "undefined";
 

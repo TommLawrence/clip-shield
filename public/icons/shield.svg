@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="ClipShield">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b0f14"/>
+      <stop offset="1" stop-color="#13202a"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#34e0b5"/>
+      <stop offset="1" stop-color="#0f9d77"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="104" fill="url(#bg)"/>
+  <path d="M256 104 L384 152 V264 C384 344 328 392 256 416 C184 392 128 344 128 264 V152 Z"
+        fill="url(#shield)" fill-opacity="0.14" stroke="url(#shield)" stroke-width="18" stroke-linejoin="round"/>
+  <path d="M202 260 L244 300 L316 214" fill="none" stroke="url(#shield)" stroke-width="26"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

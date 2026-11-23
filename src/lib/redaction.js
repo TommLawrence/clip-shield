@@ -21,4 +21,5 @@ export {
   containsRawValues,
   resolveMaskedSet,
   mergeSemanticProposals,
+  sanitizeOffsetToRaw,
 } from "../../packages/privacy-core/redaction.js";

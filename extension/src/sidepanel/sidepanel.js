@@ -17,6 +17,33 @@ import { detectOtFindings } from "@privacy-core/ot-guardrail";
 
 const app = document.getElementById("app");
 
+// Theme preference lives in this extension origin only (localStorage), is
+// non-sensitive, and is independent of the web workspace's theme state.
+function getTheme() {
+  try {
+    return localStorage.getItem("clipshield-ext-theme") === "light" ? "light" : "dark";
+  } catch {
+    return "dark";
+  }
+}
+function applyTheme(next) {
+  document.documentElement.classList.toggle("light", next === "light");
+}
+function setTheme(next) {
+  try {
+    localStorage.setItem("clipshield-ext-theme", next);
+  } catch {
+    /* storage may be unavailable; theme still applies for this session */
+  }
+  applyTheme(next);
+}
+function themeIcon() {
+  return getTheme() === "light"
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+}
+applyTheme(getTheme());
+
 // HTML entities are built from char codes so the literal sequences never
 // appear in source (and cannot be misread by tooling).
 const AMP = String.fromCharCode(38);
@@ -49,8 +76,9 @@ function render() {
   const included = state.findings.filter((finding) => finding.include).length;
 
   app.innerHTML = [
-    '<header><h1>ClipShield <span>Companion</span></h1>',
-    '<p class="tag">Local deterministic redaction · no cloud inference</p></header>',
+    '<header><div class="header-row"><div><h1>ClipShield <span>Companion</span></h1>',
+    '<p class="tag">Local deterministic redaction · no cloud inference</p></div>',
+    `<button id="theme" class="theme-btn" title="Toggle light or dark theme" aria-label="Toggle theme">${themeIcon()}</button></div></header>`,
 
     '<section class="card"><div class="row">',
     '<label class="switch-label"><span>Strict protection</span>',
@@ -153,6 +181,13 @@ function bind() {
   });
 
   document.getElementById("semantic").addEventListener("click", runSemantic);
+  const themeBtn = document.getElementById("theme");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      setTheme(getTheme() === "light" ? "dark" : "light");
+      render();
+    });
+  }
 }
 
 function rescan() {

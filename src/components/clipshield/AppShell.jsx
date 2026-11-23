@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ShieldHalf } from "lucide-react";
 import DemoAccessBanner from "@/components/clipshield/DemoAccessBanner";
+import PwaInstall from "@/components/clipshield/PwaInstall";
+import ThemeToggle from "@/components/clipshield/ThemeToggle";
 
 function NavLink({ to, children }) {
   return (
@@ -38,6 +40,8 @@ export default function AppShell({ children, status }) {
 
           <div className="ml-auto flex items-center gap-2">
             {status}
+            <PwaInstall />
+            <ThemeToggle />
             <span className="hidden rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11px] text-muted-foreground sm:inline">
               Chrome desktop 139+
             </span>

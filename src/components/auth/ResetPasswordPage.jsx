@@ -1,9 +1,7 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, Lock } from "lucide-react";
 import { useState } from "react";
-
+import { base44 } from "@/api/base44Client";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { AuthError, SubmitButton } from "@/components/auth/parts";
 import { Input } from "@/components/ui/input";
@@ -27,7 +25,7 @@ export function ResetPasswordPage() {
     }
     setBusy(true);
     try {
-      await db.auth.resetPassword({ resetToken: token, newPassword: password });
+      await base44.auth.resetPassword({ resetToken: token, newPassword: password });
       window.location.href = "/login";
     } catch (err) {
       setError(err.message || "Failed to reset password");

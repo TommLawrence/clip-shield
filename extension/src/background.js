@@ -1,5 +1,3 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 /**
  * ClipShield companion — MV3 service worker.
  *
@@ -13,7 +11,7 @@ const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me
  * Chrome storage and is cleared once the side panel has consumed it.
  */
 const MENU_ID = "clipshield-protect-selection";
-const WORKSPACE_URL = "https://clipshield.db.app";
+const WORKSPACE_URL = "https://clipshield.base44.app";
 
 let pendingSelection = null;
 

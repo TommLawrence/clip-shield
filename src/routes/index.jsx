@@ -95,6 +95,7 @@ function WorkspacePage() {
             sanitized={cs.redaction.sanitized}
             mapping={cs.redaction.mapping}
             maskedCount={cs.redaction.maskedCount}
+            sanitizeMap={cs.redaction.sanitizeMap}
             onMaskSelection={cs.maskSelection}
             onCopySanitized={cs.copySanitized}
             onCopyRestored={cs.copyRestored}
@@ -160,7 +161,7 @@ function WorkspacePage() {
             <ShieldCheck className="h-3 w-3 text-primary/80" /> Raw input and the rehydration vault never leave this tab
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <Lock className="h-3 w-3 text-primary/80" /> Nothing is written to a database or browser storage
+            <Lock className="h-3 w-3 text-primary/80" /> No sensitive data is written to storage — only your theme preference
           </span>
         </div>
       </div>

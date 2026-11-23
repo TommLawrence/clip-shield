@@ -23,6 +23,7 @@
  * every finding stays reviewable (Layer D, resolved by policy.js).
  */
 
+
 // --- Validation helpers -----------------------------------------------------
 
 /** Luhn checksum for payment-card numbers (13–19 digits). */

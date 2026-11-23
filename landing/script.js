@@ -1,5 +1,3 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 // ClipShield landing — progressive enhancement. No dependencies.
 // Interaction budget (8): sticky header, smooth anchors + mobile nav,
 // scroll-reveal (once), hover lifts (CSS), accordion FAQ (native details),
@@ -8,7 +6,7 @@ const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me
 (function () {
   "use strict";
 
-  var APP_URL = "https://clipshield.db.app/";
+  var APP_URL = "https://clipshield.base44.app/";
 
   // Gate reveal/hidden state behind a JS class so the page is fully
   // visible with JavaScript disabled.

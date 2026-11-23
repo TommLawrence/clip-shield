@@ -87,7 +87,7 @@ function HowItWorksPage() {
             {
               step: "01",
               title: "Sanitize in the browser",
-              body: "Emails, phone numbers, IP addresses, API keys, bearer tokens, JWTs, private keys and your own custom terms are replaced with reversible placeholders such as [EMAIL_1].",
+              body: "Emails, phone numbers, IP addresses, API keys, bearer tokens, JWTs, private keys and your own custom terms are replaced with reversible placeholders such as [EMAIL_1]. You can also select any span in the sanitized preview and mask it manually as [MANUAL_n].",
             },
             {
               step: "02",
@@ -181,9 +181,14 @@ function HowItWorksPage() {
                 original value — covered by unit tests in the repository.
               </p>
               <p>
-                <span className="text-amber-300">Not yet verified here:</span> live on-device and cloud inference. This
-                deployment has no Firebase project configuration attached, so no inference request has been executed. The
-                routing inspector will show an explicit configuration message rather than a simulated result.
+                <span className="text-sky-300">Cloud verified:</span> the published Base44 app initialized Firebase App
+                Check with the Enterprise provider, a loaded site key, and debug mode inactive. A live cloud request
+                completed and the routing inspector reported <span className="font-mono text-[11px]">IN_CLOUD</span>.
+              </p>
+              <p>
+                <span className="text-amber-300">Still to verify:</span> on-device Gemini Nano on supported desktop
+                hardware. Use the public testing guide and confirm that the response inspector reports{" "}
+                <span className="font-mono text-[11px]">ON_DEVICE</span> before treating the local path as verified.
               </p>
               <p>
                 <span className="text-sky-300">By design:</span> the inference source is only ever the value returned in{" "}
@@ -201,6 +206,47 @@ function HowItWorksPage() {
             addresses, credentials and tokens — which behave the same in every language. Personal names, project codenames
             and internal jargon in any script are handled with custom sensitive terms, so a Japanese incident report and a
             German vendor contract follow the same review flow. Generated briefs follow the language of the sanitized input.
+          </p>
+        </Panel>
+
+        <Panel className="mt-4">
+          <SectionHeading step="F" title="Manual redaction" hint="Mask what detectors miss" />
+          <p className="mt-3 max-w-3xl text-[12.5px] leading-relaxed text-muted-foreground">
+            Detectors are best-effort. When something slips through — an internal codename, a rare identifier, a phrase only
+            you recognize as sensitive — select it directly in the sanitized preview and choose{" "}
+            <span className="font-medium text-foreground">Mask selected text</span>. The selection becomes a reversible
+            placeholder such as <span className="cs-token">[MANUAL_1]</span>, joins the in-memory rehydration vault, and is
+            excluded from the cloud payload just like any automatic finding. Selecting across an existing placeholder is
+            rejected so the mapping cannot be corrupted, and the same value always reuses one placeholder.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
+              <p className="cs-mono text-[9.5px] text-muted-foreground">Selected in preview</p>
+              <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-[11.5px] leading-relaxed text-foreground/85">Contact owner is <span className="rounded bg-amber-400/20 px-1 text-amber-200">Aria Nakamura</span> on 10.0.0.5.</pre>
+            </div>
+            <div className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
+              <p className="cs-mono text-[9.5px] text-muted-foreground">After masking</p>
+              <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-[11.5px] leading-relaxed text-foreground/85">Contact owner is <mark className="cs-token bg-primary/10">[MANUAL_1]</mark> on <mark className="cs-token bg-primary/10">[IPV4_1]</mark>.</pre>
+            </div>
+          </div>
+          <p className="mt-3 text-[11.5px] leading-relaxed text-muted-foreground">
+            Optionally mask every exact occurrence of the selected value in one action (with explicit confirmation), and
+            pick a category so the placeholder prefix matches its kind. Exposure metrics recalculate immediately.
+          </p>
+        </Panel>
+
+        <Panel className="mt-4">
+          <SectionHeading step="G" title="Install as an app" hint="Progressive Web App" />
+          <p className="mt-3 max-w-3xl text-[12.5px] leading-relaxed text-muted-foreground">
+            ClipShield installs from the browser as a standalone app. Use{" "}
+            <span className="font-medium text-foreground">Install app</span> in the header when Chrome offers it, or open
+            the browser menu and choose <span className="font-medium text-foreground">Install ClipShield</span> /{" "}
+            <span className="font-medium text-foreground">Add to Home Screen</span>. The app shell is cached so the
+            interface opens offline; inference itself still needs the network and is never cached.
+          </p>
+          <p className="mt-2 text-[11.5px] leading-relaxed text-muted-foreground">
+            Only static application resources are cached. Original documents, sanitized content, the rehydration vault,
+            analysis output and Firebase AI requests are never cached or stored by the service worker.
           </p>
         </Panel>
 

@@ -1,5 +1,3 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 # ClipShield — Landing Page
 
 A self-contained, static marketing landing page for ClipShield. **No build step,
@@ -22,7 +20,7 @@ can be exported and deployed as its own project.
 
 Just open `index.html`. No server required. (To test `target="_blank"` app
 links during judging, the live workspace is at
-`https://clipshield.db.app/`.)
+`https://clipshield.base44.app/`.)
 
 ## Deploy
 
@@ -32,7 +30,7 @@ links during judging, the live workspace is at
 ## Where the buttons go
 
 Every "Take me in" / "Open ClipShield" button opens the live workspace
-(`https://clipshield.db.app/`) in a new tab. The URL is defined once as
+(`https://clipshield.base44.app/`) in a new tab. The URL is defined once as
 `APP_URL` in `script.js` and also appears as the plain `href` in the HTML as a
 no-JavaScript fallback.
 

@@ -12,6 +12,40 @@
   --sky: #38bdf8;
 }
 
+/* Light theme — independent of the web app. Applied via class="light" on
+   <html>; persisted in this extension origin only. */
+:root.light {
+  --bg: #f4f7f5;
+  --panel: #ffffff;
+  --panel-2: #eef3f0;
+  --border: rgba(13, 23, 18, 0.10);
+  --fg: #14201c;
+  --muted: #56645e;
+  --primary: #0f9d77;
+  --primary-ink: #ffffff;
+  --amber: #b45309;
+  --rose: #be123c;
+  --sky: #0369a1;
+}
+:root.light .btn.ghost { background: rgba(13, 23, 18, 0.04); }
+:root.light .finding .val { background: rgba(13, 23, 18, 0.05); }
+:root.light .toggle .track { background: #c7d2cd; }
+
+.header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.theme-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.theme-btn:hover { background: var(--panel-2); }
+
 * {
   box-sizing: border-box;
 }

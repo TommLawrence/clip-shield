@@ -1,8 +1,6 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
 import { Loader2, ShieldCheck } from "lucide-react";
 import { Fragment, useEffect, useState } from "react";
-
+import { base44 } from "@/api/base44Client";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { Button } from "@/components/ui/button";
 
@@ -12,7 +10,7 @@ import { Button } from "@/components/ui/button";
 // server. The page gates on the app-user session, fetches the display info for
 // the handle, shows what is being granted and posts the approve/deny decision.
 // It handles the signed-out case itself, so its route must stay OUTSIDE _authed/.
-// Do not change the `db.mcp` calls or the `ctx` handling — styling and copy
+// Do not change the `base44.mcp` calls or the `ctx` handling — styling and copy
 // are safe to edit.
 
 const loginRedirect = (loginPath, ctx) => {
@@ -114,7 +112,7 @@ export function ConsentPage() {
         }
         // Resolve the handle first: a dead handle must never render approve/deny,
         // and the response carries the app's configured login route.
-        const data = await db.mcp.getConsentInfo(ctx);
+        const data = await base44.mcp.getConsentInfo(ctx);
         // Gate on the server's answer, not on the SDK: a cookie-only session
         // reads as signed-out client-side but authenticated this request.
         if (!data.authenticated) {
@@ -136,7 +134,7 @@ export function ConsentPage() {
     setSubmitting(true);
     setError("");
     try {
-      const data = await db.mcp.respondToConsent(ctx, action);
+      const data = await base44.mcp.respondToConsent(ctx, action);
       window.location.href = data.redirect_url;
       if (!/^https?:/i.test(data.redirect_url)) {
         // Custom-scheme redirects (native AI clients) may not visibly navigate.

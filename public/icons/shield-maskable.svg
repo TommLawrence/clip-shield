@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="ClipShield">
+  <defs>
+    <linearGradient id="bgm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b0f14"/>
+      <stop offset="1" stop-color="#13202a"/>
+    </linearGradient>
+    <linearGradient id="shieldm" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#34e0b5"/>
+      <stop offset="1" stop-color="#0f9d77"/>
+    </linearGradient>
+  </defs>
+  <!-- Full-bleed background; shield sits inside the 80% safe zone for maskable. -->
+  <rect width="512" height="512" fill="url(#bgm)"/>
+  <g transform="translate(256 256) scale(0.62) translate(-256 -256)">
+    <path d="M256 104 L384 152 V264 C384 344 328 392 256 416 C184 392 128 344 128 264 V152 Z"
+          fill="url(#shieldm)" fill-opacity="0.16" stroke="url(#shieldm)" stroke-width="20" stroke-linejoin="round"/>
+    <path d="M202 260 L244 300 L316 214" fill="none" stroke="url(#shieldm)" stroke-width="30"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

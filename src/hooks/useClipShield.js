@@ -10,7 +10,6 @@ import {
 import { assessExposure } from "@/lib/risk-engine";
 import { MODE_SPECS, detectRuntime } from "@/lib/hybrid-modes";
 import { clearEvents, recordEvent } from "@/lib/telemetry";
-import { initConvex, saveReport, syncGlossary, recordTelemetry } from "@/lib/convex-client";
 import { detectOtFindings } from "@/lib/ot-guardrail";
 // Public Firebase web config is served by a stable GET server route rather
 // than a server-function RPC: the RPC endpoint returns the preview "starting
@@ -55,26 +54,6 @@ export default function useClipShield() {
 
   useEffect(() => {
     setRuntime(detectRuntime());
-  }, []);
-
-  // Connect Convex (alongside Firebase) when a deployment URL is configured.
-  // Convex is optional: if unconfigured or unavailable, every helper no-ops and
-  // the in-memory/Firebase flow is unchanged.
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await fetch("/api/convex-config", { headers: { Accept: "application/json" } });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (mounted && data?.configured && data?.url) await initConvex({ url: data.url });
-      } catch {
-        // Convex is optional — silently skip.
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
   }, []);
 
   const redaction = useMemo(() => buildRedaction(raw, findings), [raw, findings]);
@@ -135,7 +114,6 @@ export default function useClipShield() {
       const next = [...customTerms, clean];
       setCustomTerms(next);
       if (raw) inspect(raw, next);
-      syncGlossary(next);
     },
     [customTerms, raw, inspect],
   );
@@ -145,7 +123,6 @@ export default function useClipShield() {
       const next = customTerms.filter((existing) => existing !== term);
       setCustomTerms(next);
       if (raw) inspect(raw, next);
-      syncGlossary(next);
     },
     [customTerms, raw, inspect, policy],
   );
@@ -153,17 +130,22 @@ export default function useClipShield() {
   const otFindings = useMemo(() => detectOtFindings(raw), [raw]);
 
   const maskSelection = useCallback(
-    (start, end) => {
+    (start, end, options) => {
       if (!raw) return;
-      const next = addManualFinding(raw, findings, start, end);
+      const next = addManualFinding(raw, findings, start, end, options);
       if (next.length === findings.length) {
         toast.error("Select text that is not already masked.");
         return;
       }
+      const added = next.length - findings.length;
       setFindings(next);
       setInspected(true);
       resetRun();
-      toast.success("Selection added as a manual mask.");
+      toast.success(
+        options?.allOccurrences && added > 1
+          ? `Masked ${added} occurrences with one placeholder.`
+          : "Selection added as a manual mask.",
+      );
     },
     [raw, findings, resetRun],
   );
@@ -344,8 +326,6 @@ export default function useClipShield() {
           sentChars: result.sentChars,
         };
         recordEvent("inference", successEvent);
-        recordTelemetry("inference", successEvent);
-        saveReport(result);
       } catch (error) {
         const code = error?.code || "inference-failed";
         setRun({
@@ -370,7 +350,6 @@ export default function useClipShield() {
           maskedCount: built.maskedCount,
         };
         recordEvent("inference", errorEvent);
-        recordTelemetry("inference", errorEvent);
       } finally {
         setPhase("idle");
       }
