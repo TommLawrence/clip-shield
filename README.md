@@ -14,6 +14,7 @@ ClipShield is a hackathon project, not a certified security product. Detection i
 - **Public source repository:** [github.com/TommLawrence/clip-shield](https://github.com/TommLawrence/clip-shield)
 - **Hackathon:** [#BuildHybridAI 2026](https://firebasehybridaihackathon.devpost.com/)
 - **On-device testing:** [Judge and developer test guide](./docs/ON_DEVICE_TESTING.md)
+- **Development workflow:** [How the Base44, Firebase, local checkout, and public repository fit together](./docs/DEVELOPMENT_WORKFLOW.md)
 
 The live workspace is open to visitors during the judging period. Access is temporary and may be removed after judging.
 
